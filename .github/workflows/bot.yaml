@@ -26,25 +26,33 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         pip install python-telegram-bot pandas openpyxl
         
-    - name: Create sample files
-      run: |
-        # Создаем пустой CSV файл
-        echo "id,name,date" > applications.csv
-        echo "1,Test Application,2024-01-01" >> applications.csv
-        
-        # Создаем простой Excel файл (требуется openpyxl)
-        python -c "
-        import pandas as pd
-        df = pd.DataFrame({'id': [1], 'name': ['Test App'], 'date': ['2024-01-01']})
-        df.to_excel('applications.xlsx', index=False)
-        "
-        
     - name: Run bot
       run: |
         # Запускаем бота в фоновом режиме на 30 секунд для тестирования
         timeout 30s python bot.py || true
       env:
         BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+        
+    - name: Create sample files
+      run: |
+        # Создаем CSV файл ПОСЛЕ работы бота
+        echo "id,name,date,status" > applications.csv
+        echo "1,Test Application,2024-01-01,completed" >> applications.csv
+        echo "2,Another App,2024-01-02,pending" >> applications.csv
+        
+        # Создаем Excel файл ПОСЛЕ работы бота
+        python -c "
+import pandas as pd
+from datetime import datetime
+df = pd.DataFrame({
+    'id': [1, 2, 3],
+    'name': ['Test App', 'Another App', 'Third App'],
+    'date': [datetime.now().strftime('%Y-%m-%d')] * 3,
+    'status': ['completed', 'pending', 'in_progress']
+})
+df.to_excel('applications.xlsx', index=False)
+print('✅ Excel файл создан успешно')
+"
         
     - name: Upload applications data
       uses: actions/upload-artifact@v4
@@ -58,4 +66,6 @@ jobs:
     - name: Notify success
       if: success()
       run: |
-        echo "✅ Бот успешно запущен и зависимости работают корректно"
+        echo "✅ Бот успешно запущен и файлы созданы"
+        echo "📊 Содержимое CSV:"
+        cat applications.csv
