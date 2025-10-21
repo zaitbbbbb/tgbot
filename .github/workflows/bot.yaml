@@ -13,7 +13,7 @@ jobs:
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4  # Обновили до v4
+      uses: actions/checkout@v4
       
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -24,7 +24,6 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        # Дополнительные зависимости, которые могут понадобиться
         pip install python-telegram-bot pandas openpyxl
         
     - name: Run bot
@@ -35,7 +34,7 @@ jobs:
         BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
         
     - name: Upload applications data
-      uses: actions/upload-artifact@v4  # Обновили до v4
+      uses: actions/upload-artifact@v4  # ИЗМЕНИЛИ НА v4
       with:
         name: applications-data
         path: |
