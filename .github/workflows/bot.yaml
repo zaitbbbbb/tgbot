@@ -26,6 +26,19 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         pip install python-telegram-bot pandas openpyxl
         
+    - name: Create sample files
+      run: |
+        # Создаем пустой CSV файл
+        echo "id,name,date" > applications.csv
+        echo "1,Test Application,2024-01-01" >> applications.csv
+        
+        # Создаем простой Excel файл (требуется openpyxl)
+        python -c "
+        import pandas as pd
+        df = pd.DataFrame({'id': [1], 'name': ['Test App'], 'date': ['2024-01-01']})
+        df.to_excel('applications.xlsx', index=False)
+        "
+        
     - name: Run bot
       run: |
         # Запускаем бота в фоновом режиме на 30 секунд для тестирования
@@ -34,7 +47,7 @@ jobs:
         BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
         
     - name: Upload applications data
-      uses: actions/upload-artifact@v4  # ИЗМЕНИЛИ НА v4
+      uses: actions/upload-artifact@v4
       with:
         name: applications-data
         path: |
