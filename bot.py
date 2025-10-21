@@ -18,8 +18,12 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-BOT_TOKEN = "8449976484:AAEH_IPxs2JyPoPTyd2Gf3DOf8uPjnt-mCw"
+# BOT_TOKEN = "8449976484:AAEH_IPxs2JyPoPTyd2Gf3DOf8uPjnt-mCw"
+BOT_TOKEN = os.environ.get('BOT_TOKEN')
 
+if not BOT_TOKEN:
+    print("Ошибка: BOT_TOKEN не найден!")
+    exit(1)
 # Состояния для ConversationHandler
 (
     NAME, PROJECT_NAME, PROJECT_DESCRIPTION, PATENT,
@@ -593,4 +597,5 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         print("\n🛑 Бот остановлен пользователем")
     except Exception as e:
+
         print(f"❌ Критическая ошибка: {e}")
