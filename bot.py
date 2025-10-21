@@ -7,6 +7,27 @@ from datetime import datetime
 from telegram import Update, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackContext, ConversationHandler
 
+# Создаем тестовые данные при завершении бота
+def create_sample_files():
+    try:
+        # CSV файл
+        with open('applications.csv', 'w', encoding='utf-8') as f:
+            f.write("id,name,date,status\n")
+            f.write("1,Test Application,2024-01-01,completed\n")
+            f.write("2,Another App,2024-01-02,pending\n")
+        
+        # Excel файл
+        df = pd.DataFrame({
+            'id': [1, 2, 3],
+            'name': ['Test App', 'Another App', 'Third App'],
+            'date': [datetime.now().strftime('%Y-%m-%d')] * 3,
+            'status': ['completed', 'pending', 'in_progress']
+        })
+        df.to_excel('applications.xlsx', index=False)
+        print("✅ Файлы applications.csv и applications.xlsx созданы")
+    except Exception as e:
+        print(f"❌ Ошибка создания файлов: {e}")
+
 # Настройка логирования
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -24,6 +45,7 @@ BOT_TOKEN = os.environ.get('BOT_TOKEN')
 if not BOT_TOKEN:
     print("Ошибка: BOT_TOKEN не найден!")
     exit(1)
+
 # Состояния для ConversationHandler
 (
     NAME, PROJECT_NAME, PROJECT_DESCRIPTION, PATENT,
@@ -42,7 +64,6 @@ COMPETITION_INFO = """
 Каждый участник может представить свой проект перед экспертами, получить обратную связь по улучшению и применению изобретения, установить новые деловые контакты и в случае победы получить поддержку на развитие проекта.
 """
 
-
 # Клавиатура с кнопками
 def get_main_keyboard():
     keyboard = [
@@ -52,7 +73,6 @@ def get_main_keyboard():
         ["📞 Контакты"]
     ]
     return ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
-
 
 # Обработчик команды /start
 async def start(update: Update, context: CallbackContext) -> None:
@@ -66,11 +86,9 @@ async def start(update: Update, context: CallbackContext) -> None:
 
     await update.message.reply_text(welcome_text, reply_markup=get_main_keyboard())
 
-
 # Обработчик кнопки "Информация о конкурсе"
 async def competition_info(update: Update, context: CallbackContext) -> None:
     await update.message.reply_text(COMPETITION_INFO)
-
 
 # Обработчик кнопки "Номинации"
 async def nominations(update: Update, context: CallbackContext) -> None:
@@ -92,12 +110,10 @@ async def nominations(update: Update, context: CallbackContext) -> None:
 """
     await update.message.reply_text(nominations_text)
 
-
 # Обработчик кнопки "Программа мероприятия"
 async def event_program(update: Update, context: CallbackContext) -> None:
     program_text = "📅 Программа мероприятия еще на стадии доработки, но совсем скоро она появится здесь!"
     await update.message.reply_text(program_text)
-
 
 # Обработчик кнопки "Контакты"
 async def contacts(update: Update, context: CallbackContext) -> None:
@@ -108,7 +124,6 @@ async def contacts(update: Update, context: CallbackContext) -> None:
 """
     await update.message.reply_text(contacts_text)
 
-
 # Начало процесса подачи заявки
 async def start_application(update: Update, context: CallbackContext) -> int:
     await update.message.reply_text(
@@ -117,7 +132,6 @@ async def start_application(update: Update, context: CallbackContext) -> int:
         reply_markup=ReplyKeyboardRemove()
     )
     return NAME
-
 
 # Получение ФИО
 async def get_name(update: Update, context: CallbackContext) -> int:
@@ -130,7 +144,6 @@ async def get_name(update: Update, context: CallbackContext) -> int:
     )
     return PROJECT_NAME
 
-
 # Получение названия разработки
 async def get_project_name(update: Update, context: CallbackContext) -> int:
     project_name = update.message.text
@@ -141,7 +154,6 @@ async def get_project_name(update: Update, context: CallbackContext) -> int:
         "Теперь опиши подробно свой проект (основная идея, назначение, особенности):"
     )
     return PROJECT_DESCRIPTION
-
 
 # Получение описания проекта
 async def get_project_description(update: Update, context: CallbackContext) -> int:
@@ -154,7 +166,6 @@ async def get_project_description(update: Update, context: CallbackContext) -> i
     )
     return PATENT
 
-
 # Получение информации о патенте
 async def get_patent(update: Update, context: CallbackContext) -> int:
     patent_info = update.message.text
@@ -164,7 +175,6 @@ async def get_patent(update: Update, context: CallbackContext) -> int:
         "📞 Теперь укажи свой контактный телефон:"
     )
     return PHONE
-
 
 # Получение телефона
 async def get_phone(update: Update, context: CallbackContext) -> int:
@@ -176,7 +186,6 @@ async def get_phone(update: Update, context: CallbackContext) -> int:
         reply_markup=ReplyKeyboardMarkup([["Пропустить"]], resize_keyboard=True)
     )
     return EMAIL
-
 
 # Получение email
 async def get_email(update: Update, context: CallbackContext) -> int:
@@ -192,7 +201,6 @@ async def get_email(update: Update, context: CallbackContext) -> int:
     )
     return SOCIAL_MEDIA
 
-
 # Получение соцсетей
 async def get_social_media(update: Update, context: CallbackContext) -> int:
     if update.message.text == "Пропустить":
@@ -207,7 +215,6 @@ async def get_social_media(update: Update, context: CallbackContext) -> int:
     )
     return TEAM_MEMBERS
 
-
 # Получение информации о команде
 async def get_team_members(update: Update, context: CallbackContext) -> int:
     team_members = update.message.text
@@ -217,7 +224,6 @@ async def get_team_members(update: Update, context: CallbackContext) -> int:
         "🏙️ Укажи свой город:"
     )
     return CITY
-
 
 # Получение города
 async def get_city(update: Update, context: CallbackContext) -> int:
@@ -229,7 +235,6 @@ async def get_city(update: Update, context: CallbackContext) -> int:
         reply_markup=ReplyKeyboardMarkup([["Пропустить"]], resize_keyboard=True)
     )
     return UNIVERSITY
-
 
 # Получение ВУЗа
 async def get_university(update: Update, context: CallbackContext) -> int:
@@ -244,7 +249,6 @@ async def get_university(update: Update, context: CallbackContext) -> int:
         reply_markup=ReplyKeyboardMarkup([["Пропустить"]], resize_keyboard=True)
     )
     return FACULTY
-
 
 # Получение факультета и завершение заявки
 async def get_faculty(update: Update, context: CallbackContext) -> int:
@@ -298,7 +302,6 @@ async def get_faculty(update: Update, context: CallbackContext) -> int:
 
     return ConversationHandler.END
 
-
 # Начало регистрации зрителя
 async def start_viewer_registration(update: Update, context: CallbackContext) -> int:
     await update.message.reply_text(
@@ -306,7 +309,6 @@ async def start_viewer_registration(update: Update, context: CallbackContext) ->
         reply_markup=ReplyKeyboardRemove()
     )
     return VIEWER_NAME
-
 
 # Получение ФИО зрителя
 async def get_viewer_name(update: Update, context: CallbackContext) -> int:
@@ -318,7 +320,6 @@ async def get_viewer_name(update: Update, context: CallbackContext) -> int:
         "Теперь укажи свой контактный телефон:"
     )
     return VIEWER_PHONE
-
 
 # Получение телефона зрителя и завершение регистрации
 async def get_viewer_phone(update: Update, context: CallbackContext) -> int:
@@ -356,7 +357,6 @@ async def get_viewer_phone(update: Update, context: CallbackContext) -> int:
     context.user_data.clear()
 
     return ConversationHandler.END
-
 
 # Сохранение заявки в Excel и CSV
 async def save_application(update: Update, context: CallbackContext) -> bool:
@@ -397,7 +397,6 @@ async def save_application(update: Update, context: CallbackContext) -> bool:
         logger.error(f"❌ Ошибка при сохранении заявки: {e}")
         return False
 
-
 # Сохранение заявки зрителя
 async def save_viewer_application(update: Update, context: CallbackContext) -> bool:
     try:
@@ -428,7 +427,6 @@ async def save_viewer_application(update: Update, context: CallbackContext) -> b
         logger.error(f"❌ Ошибка при сохранении заявки зрителя: {e}")
         return False
 
-
 # Сохранение в CSV
 def save_to_csv(application_data):
     try:
@@ -458,7 +456,6 @@ def save_to_csv(application_data):
         except Exception as backup_error:
             logger.error(f"❌ Ошибка создания backup CSV: {backup_error}")
             return False
-
 
 # Сохранение в Excel
 def save_to_excel(application_data):
@@ -500,7 +497,6 @@ def save_to_excel(application_data):
         logger.error(f"❌ Критическая ошибка при работе с Excel: {e}")
         return False
 
-
 # Отмена заявки
 async def cancel_application(update: Update, context: CallbackContext) -> int:
     await update.message.reply_text(
@@ -510,7 +506,6 @@ async def cancel_application(update: Update, context: CallbackContext) -> int:
     context.user_data.clear()
     return ConversationHandler.END
 
-
 # Отмена регистрации зрителя
 async def cancel_viewer_registration(update: Update, context: CallbackContext) -> int:
     await update.message.reply_text(
@@ -519,7 +514,6 @@ async def cancel_viewer_registration(update: Update, context: CallbackContext) -
     )
     context.user_data.clear()
     return ConversationHandler.END
-
 
 # Обработчик текстовых сообщений
 async def handle_message(update: Update, context: CallbackContext) -> None:
@@ -542,7 +536,6 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
             "Используй кнопки для навигации! 📱",
             reply_markup=get_main_keyboard()
         )
-
 
 # Основная функция
 def main() -> None:
@@ -590,12 +583,13 @@ def main() -> None:
     print("📝 Логи сохраняются в bot.log")
     application.run_polling()
 
-
 if __name__ == '__main__':
     try:
         main()
     except KeyboardInterrupt:
         print("\n🛑 Бот остановлен пользователем")
     except Exception as e:
-
         print(f"❌ Критическая ошибка: {e}")
+    finally:
+        create_sample_files()
+
