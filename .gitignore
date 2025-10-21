@@ -1,0 +1,7 @@
+applications.csv
+applications.xlsx
+bot.log
+backup_applications_*.csv
+__pycache__/
+*.pyc
+.env
